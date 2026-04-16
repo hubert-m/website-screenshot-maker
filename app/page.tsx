@@ -1,65 +1,241 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { 
+  Globe, 
+  Maximize2, 
+  Minimize2, 
+  Camera, 
+  Download, 
+  AlertCircle, 
+  CheckCircle2, 
+  Layers 
+} from 'lucide-react';
 
 export default function Home() {
+  const [formData, setFormData] = useState({
+    url: '',
+    width: 1920,
+    height: 1080,
+    fullPage: false,
+    format: 'png',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    // Basic URL validation
+    if (!formData.url.startsWith('http://') && !formData.url.startsWith('https://')) {
+      setError('Adres URL musi zaczynać się od http:// lub https://');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/screenshot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Wystąpił błąd podczas generowania zrzutu.');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `screenshot_${new Date().getTime()}.${formData.format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseInt(value as string) : val
+    }));
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 overflow-hidden relative">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full"></div>
+
+      <div className="max-w-xl w-full z-10">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center p-3 bg-indigo-500/10 rounded-2xl mb-4 border border-indigo-500/20">
+            <Camera className="w-8 h-8 text-indigo-400" />
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+            Snapshot <span className="text-indigo-400">Maker</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          <p className="text-slate-400 text-lg">Uchwyć dowolną stronę w kilka sekund.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="glass-panel p-8 rounded-3xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* URL Input */}
+            <div className="space-y-2">
+              <label htmlFor="url" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                <Globe className="w-4 h-4" /> Adres URL strony
+              </label>
+              <div className="relative group">
+                <input
+                  id="url"
+                  name="url"
+                  type="url"
+                  required
+                  placeholder="https://example.com"
+                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white p-4 rounded-xl input-focus group-hover:border-slate-600 transition-colors"
+                  value={formData.url}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Width */}
+              <div className="space-y-2">
+                <label htmlFor="width" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Maximize2 className="w-4 h-4" /> Szerokość (px)
+                </label>
+                <input
+                  id="width"
+                  name="width"
+                  type="number"
+                  placeholder="1920"
+                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white p-4 rounded-xl input-focus"
+                  value={formData.width}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              {/* Height */}
+              <div className="space-y-2">
+                <label 
+                  htmlFor="height" 
+                  className={`text-sm font-medium flex items-center gap-2 transition-colors ${formData.fullPage ? 'text-slate-600' : 'text-slate-300'}`}
+                >
+                  <Minimize2 className="w-4 h-4" /> Wysokość (px)
+                </label>
+                <input
+                  id="height"
+                  name="height"
+                  type="number"
+                  disabled={formData.fullPage}
+                  className={`w-full p-4 rounded-xl input-focus transition-all duration-300 ${
+                    formData.fullPage 
+                      ? 'bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed opacity-50' 
+                      : 'bg-slate-800/50 border-slate-700/50 text-white'
+                  }`}
+                  value={formData.height}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* Format Select */}
+              <div className="w-full space-y-2">
+                <label htmlFor="format" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Layers className="w-4 h-4" /> Format pliku
+                </label>
+                <select
+                  id="format"
+                  name="format"
+                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white p-4 rounded-xl input-focus appearance-none cursor-pointer"
+                  value={formData.format}
+                  onChange={handleInputChange}
+                >
+                  <option value="png">PNG</option>
+                  <option value="jpg">JPG</option>
+                </select>
+              </div>
+
+              {/* Full Page Checkbox */}
+              <div className="w-full flex items-center mt-6">
+                <label className="relative flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="fullPage"
+                    className="sr-only peer"
+                    checked={formData.fullPage}
+                    onChange={handleInputChange}
+                  />
+                  <div className="w-12 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
+                  <span className="text-sm font-medium text-slate-300">Cała strona</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <CheckCircle2 className="w-5 h-5 shrink-0" />
+                <p className="text-sm font-medium">Zrzut został pomyślnie wygenerowany!</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full group flex items-center justify-center gap-3 p-4 rounded-xl font-semibold text-white transition-all duration-300 ${
+                isLoading 
+                  ? 'bg-slate-700 cursor-not-allowed' 
+                  : 'bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-500/25'
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Generowanie...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                  <span>Generuj i pobierz</span>
+                </>
+              )}
+            </button>
+          </form>
         </div>
-      </main>
+        
+        <p className="text-center text-slate-500 text-sm mt-8">
+          Przetwarzanie może potrwać kilka sekund w zależności od strony.
+        </p>
+      </div>
     </div>
   );
 }
