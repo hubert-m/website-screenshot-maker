@@ -50,8 +50,36 @@ export async function POST(req: NextRequest) {
     const page = await browser.newPage();
     await page.setViewport({ width, height });
     
-    // Wait until network is idle to ensure all resources are loaded
+    // Wait until network is idle to ensure initial resources are loaded
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+
+    // Auto-scroll logic to trigger lazy loading
+    await page.evaluate(async (targetH, isFull) => {
+      await new Promise<void>((resolve) => {
+        let totalHeight = 0;
+        const distance = 100;
+        const timer = setInterval(() => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+
+          if (isFull) {
+            if (totalHeight >= scrollHeight) {
+              clearInterval(timer);
+              resolve();
+            }
+          } else {
+            if (totalHeight >= targetH || totalHeight >= scrollHeight) {
+              clearInterval(timer);
+              resolve();
+            }
+          }
+        }, 100);
+      });
+    }, height, fullPage);
+
+    // Briefly wait for any lazy-loaded content/animations to settle
+    await new Promise(r => setTimeout(r, 1000));
 
     const screenshotBuffer = await page.screenshot({
       fullPage,
