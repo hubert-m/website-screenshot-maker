@@ -76,9 +76,12 @@ export async function POST(req: NextRequest) {
           }
         }, 100);
       });
+      
+      // Return to the top of the page
+      window.scrollTo(0, 0);
     }, height, fullPage);
 
-    // Briefly wait for any lazy-loaded content/animations to settle
+    // Briefly wait for any lazy-loaded content/animations to settle and for sticky elements to reposition
     await new Promise(r => setTimeout(r, 1000));
 
     const screenshotBuffer = await page.screenshot({
