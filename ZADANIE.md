@@ -26,12 +26,17 @@
 > * Odbiera żądanie POST z danymi w formacie JSON (url, width, height, fullPage, format).
 > * Waliduje otrzymane dane (sprawdza czy URL jest obecny).
 > * **Logika Puppeteer:**
->    - Uruchamia nową instancję przeglądarki w tle: `puppeteer.launch({ headless: true })`.
+>    - **Inicjalizacja przeglądarki (zależna od środowiska):**
+>      - **Lokalnie (`NODE_ENV === 'development'`):** Uruchamia nową instancję: `puppeteer.launch({ headless: true })`.
+>      - **Produkcja:** Łączy się z istniejącą instancją Chrome. Logika:
+>        1. Pobierz dane JSON z `http://127.0.0.1:9222/json/version`.
+>        2. Znajdź w odpowiedzi pole `webSocketDebuggerUrl`.
+>        3. Połącz się używając: `puppeteer.connect({ browserWSEndpoint: wsUrl, defaultViewport: { width: 1920, height: 1080 } })`.
 >    - Otwiera nową kartę: `browser.newPage()`.
 >    - Ustawia rozmiar okna na podstawie przesłanej szerokości i wysokości: `page.setViewport({ width, height })`.
 >    - Przechodzi pod wskazany URL: `page.goto(url, { waitUntil: 'networkidle0' })` (żeby poczekać na załadowanie zasobów strony).
 >    - Generuje zrzut ekranu: `page.screenshot(...)`. Jeśli przekazano flagę `fullPage: true`, ustaw odpowiednią opcję w funkcji screenshot, zignoruj wtedy limit wysokości. Zwróć uwagę na wybrany przez usera format pliku.
->    - **Kluczowe:** Bezpiecznie zamyka przeglądarkę po udanym zrzucie: `await browser.close()`. Zamknij ją również w bloku `catch`, jeśli wystąpi błąd podczas renderowania strony!
+>    - **Kluczowe:** Bezpiecznie zamyka sesję po udanym zrzucie: `await browser.disconnect()` (dla produkcji) lub `await browser.close()` (dla lokalnego). Zamknij zasoby również w bloku `catch`, jeśli wystąpi błąd podczas renderowania strony!
 > * **Zwracanie danych:** Zwraca wygenerowany obraz jako bufor bezpośrednio w obiekcie `NextResponse`. Ustaw odpowiednie nagłówki: `Content-Type` (np. `image/png`) oraz `Content-Disposition: attachment; filename="screenshot.[format]"`, aby wymusić pobieranie.
 > 
 > Wygeneruj strukturę plików oraz pełny kod dla głównych elementów: strony głównej (`page.tsx`) oraz endpointu API (`route.ts`). Dodaj też instrukcję z komendami do instalacji potrzebnych paczek (szczególnie `puppeteer`).
