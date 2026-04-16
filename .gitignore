@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pull.sh
+ecosystem.config.cjs
+VERSION.txt
+/logs
