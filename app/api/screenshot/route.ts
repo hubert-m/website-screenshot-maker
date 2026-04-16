@@ -173,6 +173,19 @@ export async function POST(req: NextRequest) {
     // Briefly wait for any lazy-loaded content/animations to settle and for sticky elements to reposition
     await new Promise(r => setTimeout(r, 3000));
 
+    // Inject CSS to hide scrollbars
+    await page.addStyleTag({
+      content: `
+        ::-webkit-scrollbar {
+          display: none !important;
+        }
+        html {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+      `,
+    });
+
     const screenshotBuffer = await page.screenshot({
       fullPage,
       type: format === 'jpg' ? 'jpeg' : 'png',
