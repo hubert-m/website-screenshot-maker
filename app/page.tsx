@@ -232,9 +232,54 @@ export default function Home() {
           </form>
         </div>
         
-        <p className="text-center text-slate-500 text-sm mt-8">
+        <p className="text-center text-slate-500 text-sm mt-8 pb-12">
           Przetwarzanie może potrwać kilka sekund w zależności od strony.
         </p>
+
+        {/* SEO Content Section */}
+        <div className="mt-16 sm:mt-24 space-y-16 max-w-4xl mx-auto px-4 py-16 border-t border-slate-800">
+          <section className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-white tracking-tight">Najlepsze narzędzie do zrzutów ekranu online</h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Nasz Website Screenshot Maker wykorzystuje najnowszą technologię Puppeteer, aby zapewnić najdokładniejsze odwzorowanie stron internetowych.
+            </p>
+          </section>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Automatyczny scroll
+              </h3>
+              <p className="text-slate-400">
+                Nasz skrypt inteligentnie przewija każdą stronę, aby wyzwolić mechanizmy "lazy loading". Dzięki temu na zrzucie zobaczysz wszystkie obrazy i sekcje, nie tylko te widoczne na początku.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Omijanie banerów Cookies
+              </h3>
+              <p className="text-slate-400">
+                Wspieramy automatyczne klikanie w popularne banery zgód na pliki cookies (np. Cookiebot). Zrzuty są czyste i pozbawione zbędnych nakładek.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Pełna wysokość strony
+              </h3>
+              <p className="text-slate-400">
+                Opcja "Cała strona" pozwala na uchwycenie witryny od nagłówka aż po stopkę w jednym, wysokiej jakości pliku graficznym.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Wysoka jakość JPG i PNG
+              </h3>
+              <p className="text-slate-400">
+                Możesz wybrać format pliku dostosowany do Twoich potrzeb – bezstratny PNG dla precyzji lub lekki JPG dla oszczędności miejsca.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
