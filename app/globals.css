@@ -43,19 +43,31 @@ body {
   min-height: 100vh;
 }
 
-/* 
-   GLOBAL SCROLLBAR CLEANUP 
-   Completely hide all native scrollbars to allow 
-   the custom floating scrollbar to be the sole navigator.
-*/
-*::-webkit-scrollbar {
-  display: none !important;
+/* Custom Styled Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
 }
 
-* {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none;    /* Firefox */
+::-webkit-scrollbar-track {
+  background: var(--background);
 }
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 6px;
+  border: 3px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 var(--background);
+}
+
 
 .glass-panel {
   background: var(--glass);
