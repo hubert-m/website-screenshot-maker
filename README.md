@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📸 Website Screenshot Maker
 
-## Getting Started
+A modern, high-performance web application to capture, customize, and download website screenshots. Built with **Next.js 14+**, **Tailwind CSS 4**, and **Puppeteer**.
 
-First, run the development server:
+![Screenshot App Mockup](https://raw.githubusercontent.com/lucide-react/lucide/main/icons/camera.svg)
+
+## 🚀 Key Features
+
+-   **Intelligent Browser Automation:** Adaptive connection logic for local and production environments.
+-   **Full Customization:** Control width, height, and file format (PNG/JPG).
+-   **Full Page Mode:** Capture the entire length of any webpage with one click.
+-   **Premium UI:** Glassmorphism design with smooth animations and responsive feedback.
+-   **One-Click Download:** Screenshots are automatically prepared and downloaded to your device.
+
+## 🛠️ Tech Stack
+
+-   **Frontend:** Next.js (App Router), React, TypeScript.
+-   **Styling:** Tailwind CSS 4, Lucide React (Icons).
+-   **Backend:** Puppeteer (Headless Chrome).
+
+## ⚙️ Environment Configuration
+
+The application uses environment variables for flexible deployment. Copy `.env.example` to `.env.local` to get started.
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `CHROME_DEBUGGER_URL` | URL to fetch Chrome's `webSocketDebuggerUrl` (Production only). | `http://127.0.0.1:9222/json/version` |
+| `NODE_ENV` | Current environment (`development` or `production`). | `development` |
+
+## 💻 Getting Started
+
+### 1. Installation
+
+```bash
+npm install
+```
+
+### 2. Running Locally
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will use `puppeteer.launch()` to start a fresh browser instance for each request in local development.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Production Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+In production, the app is optimized to connect to an **already running Chrome instance** to save resources and improve performance.
 
-## Learn More
+#### **Chrome Setup:**
+Ensure Chrome/Chromium is running on your server with remote debugging enabled:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Example for Windows
+chrome.exe --remote-debugging-port=9222 --headless
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Example for Linux
+google-chrome --remote-debugging-port=9222 --headless --no-sandbox
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### **Next.js Setup:**
+1.  Set `NODE_ENV=production`.
+2.  Configure `CHROME_DEBUGGER_URL` if your Chrome instance is not on the default port/host.
+3.  Build and start:
 
-## Deploy on Vercel
+```bash
+npm run build
+npm run start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open-source and available under the MIT License.

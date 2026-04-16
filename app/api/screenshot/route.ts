@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
     } else {
       // Production path: Connect to existing Chrome instance
       try {
-        const versionResponse = await fetch('http://127.0.0.1:9222/json/version');
+        const debuggerUrl = process.env.CHROME_DEBUGGER_URL || 'http://127.0.0.1:9222/json/version';
+        const versionResponse = await fetch(debuggerUrl);
         const data = await versionResponse.json();
         const wsUrl = data.webSocketDebuggerUrl;
 
