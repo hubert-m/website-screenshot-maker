@@ -291,12 +291,8 @@ export default function Home() {
                   desc: "Wybierz format pliku dostosowany do potrzeb – bezstratny PNG dla precyzji lub lekki JPG dla oszczędności miejsca."
                 }
               ].map((feature, i) => (
-                <motion.div 
+                <div 
                   key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
                   className="glass-panel p-6 rounded-2xl hover:border-indigo-500/30 transition-all group"
                 >
                   <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -306,7 +302,7 @@ export default function Home() {
                   <p className="text-slate-400 text-sm leading-relaxed">
                     {feature.desc}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
