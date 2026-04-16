@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     const contentType = format === 'jpg' ? 'image/jpeg' : 'image/png';
     const filename = `screenshot.${format}`;
 
-    return new NextResponse(screenshotBuffer, {
+    return new NextResponse(screenshotBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': contentType,
