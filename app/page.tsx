@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { 
   Globe, 
   Maximize2, 
@@ -13,11 +14,15 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
+  const y2 = useTransform(scrollY, [0, 1000], [0, -200]);
+
   const [formData, setFormData] = useState({
     url: '',
     width: 1920,
     height: 1080,
-    fullPage: false,
+    fullPage: true,
     format: 'png',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -79,12 +84,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 overflow-hidden relative">
-      {/* Decorative background elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full"></div>
+    <div className="w-full flex flex-col items-center p-6 relative">
+      {/* Decorative background elements with Parallax */}
+      <motion.div 
+        style={{ y: y1 }}
+        className="fixed top-[-10%] left-[-10%] w-[60%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full -z-10"
+      ></motion.div>
+      <motion.div 
+        style={{ y: y2 }}
+        className="fixed bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full -z-10"
+      ></motion.div>
 
-      <div className="max-w-xl w-full z-10">
+      <div className="max-w-xl w-full z-10 pt-12 sm:pt-24 flex-shrink-0">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 bg-indigo-500/10 rounded-2xl mb-4 border border-indigo-500/20">
             <Camera className="w-8 h-8 text-indigo-400" />
@@ -109,6 +120,7 @@ export default function Home() {
                   type="url"
                   required
                   placeholder="https://example.com"
+                  autoComplete="off"
                   className="w-full bg-slate-800/50 border border-slate-700/50 text-white p-4 rounded-xl input-focus group-hover:border-slate-600 transition-colors"
                   value={formData.url}
                   onChange={handleInputChange}
@@ -127,6 +139,7 @@ export default function Home() {
                   name="width"
                   type="number"
                   placeholder="1920"
+                  autoComplete="off"
                   className="w-full bg-slate-800/50 border border-slate-700/50 text-white p-4 rounded-xl input-focus"
                   value={formData.width}
                   onChange={handleInputChange}
@@ -146,6 +159,7 @@ export default function Home() {
                   name="height"
                   type="number"
                   disabled={formData.fullPage}
+                  autoComplete="off"
                   className={`w-full p-4 rounded-xl input-focus transition-all duration-300 ${
                     formData.fullPage 
                       ? 'bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed opacity-50' 
@@ -235,48 +249,65 @@ export default function Home() {
         <p className="text-center text-slate-500 text-sm mt-8 pb-12">
           Przetwarzanie może potrwać kilka sekund w zależności od strony.
         </p>
+      </div>
 
-        {/* SEO Content Section */}
-        <div className="mt-16 sm:mt-24 space-y-16 max-w-4xl mx-auto px-4 py-16 border-t border-slate-800">
-          <section className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-white tracking-tight">Najlepsze narzędzie do zrzutów ekranu online</h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Nasz Website Screenshot Maker wykorzystuje najnowszą technologię Puppeteer, aby zapewnić najdokładniejsze odwzorowanie stron internetowych.
-            </p>
-          </section>
+      {/* SEO Content Section - Wider Container */}
+      <div className="w-full max-w-6xl z-10 px-4 mt-12 mb-24">
+        <div className="relative">
+          <div className="absolute inset-0 bg-indigo-500/5 blur-3xl -z-10 rounded-full"></div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+            <div className="lg:col-span-1 space-y-6">
+              <h2 className="text-4xl font-extrabold text-white tracking-tight leading-tight">
+                Najlepsze narzędzie do <span className="text-indigo-400">zrzutów ekranu</span> online
+              </h2>
+              <p className="text-slate-400 text-lg leading-relaxed">
+                Nasz Website Screenshot Maker wykorzystuje najnowszą technologię Puppeteer, aby zapewnić najdokładniejsze odwzorowanie stron internetowych. 
+                Idealne dla designerów, deweloperów i marketerów.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <span className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-300 text-sm font-medium">Auto-Scroll</span>
+                <span className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full text-purple-300 text-sm font-medium">Cookie Bypass</span>
+                <span className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-300 text-sm font-medium">HD Quality</span>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Automatyczny scroll
-              </h3>
-              <p className="text-slate-400">
-                Nasz skrypt inteligentnie przewija każdą stronę, aby wyzwolić mechanizmy "lazy loading". Dzięki temu na zrzucie zobaczysz wszystkie obrazy i sekcje, nie tylko te widoczne na początku.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Omijanie banerów Cookies
-              </h3>
-              <p className="text-slate-400">
-                Wspieramy automatyczne klikanie w popularne banery zgód na pliki cookies (np. Cookiebot). Zrzuty są czyste i pozbawione zbędnych nakładek.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Pełna wysokość strony
-              </h3>
-              <p className="text-slate-400">
-                Opcja "Cała strona" pozwala na uchwycenie witryny od nagłówka aż po stopkę w jednym, wysokiej jakości pliku graficznym.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Wysoka jakość JPG i PNG
-              </h3>
-              <p className="text-slate-400">
-                Możesz wybrać format pliku dostosowany do Twoich potrzeb – bezstratny PNG dla precyzji lub lekki JPG dla oszczędności miejsca.
-              </p>
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[
+                {
+                  title: "Automatyczny scroll",
+                  desc: "Nasz skrypt inteligentnie przewija każdą stronę, aby wyzwolić mechanizmy \"lazy loading\". Dzięki temu na zrzucie zobaczysz wszystkie obrazy i sekcje."
+                },
+                {
+                  title: "Omijanie banerów Cookies",
+                  desc: "Wspieramy automatyczne klikanie w popularne banery zgód na pliki cookies. Zrzuty są czyste i pozbawione zbędnych nakładek."
+                },
+                {
+                  title: "Pełna wysokość strony",
+                  desc: "Opcja \"Cała strona\" pozwala na uchwycenie witryny od nagłówka aż po stopkę w jednym, wysokiej jakości pliku graficznym."
+                },
+                {
+                  title: "Wysoka jakość JPG/PNG",
+                  desc: "Wybierz format pliku dostosowany do potrzeb – bezstratny PNG dla precyzji lub lekki JPG dla oszczędności miejsca."
+                }
+              ].map((feature, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  className="glass-panel p-6 rounded-2xl hover:border-indigo-500/30 transition-all group"
+                >
+                  <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="w-6 h-6 text-indigo-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>

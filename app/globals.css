@@ -14,11 +14,47 @@
   --color-foreground: var(--foreground);
 }
 
+/* Lenis Smooth Scroll Base Styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 body {
   background: radial-gradient(circle at top left, #1e1b4b 0%, #0f172a 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
   min-height: 100vh;
+}
+
+/* 
+   GLOBAL SCROLLBAR CLEANUP 
+   Completely hide all native scrollbars to allow 
+   the custom floating scrollbar to be the sole navigator.
+*/
+*::-webkit-scrollbar {
+  display: none !important;
+}
+
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
 }
 
 .glass-panel {
@@ -32,4 +68,3 @@ body {
 .input-focus {
   @apply focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all duration-200;
 }
-

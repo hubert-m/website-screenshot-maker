@@ -12,6 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import SmoothScroll from "@/components/SmoothScroll";
+import { ScrollProgress } from "@/components/ScrollProgress";
+import CustomScrollbar from "@/components/CustomScrollbar";
+
 export const metadata: Metadata = {
   title: "Website Screenshot Maker | High-Quality Full Page Captures",
   description: "Capture high-quality, full-page screenshots of any website online. Supports custom resolutions, auto-scroll for lazy loading, and cookie consent bypass. Fast, reliable, and mobile-friendly.",
@@ -30,7 +34,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SmoothScroll>
+          <ScrollProgress />
+          {children}
+        </SmoothScroll>
+      </body>
     </html>
   );
 }
