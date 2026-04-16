@@ -1,14 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
+import fs from 'fs';
+import path from 'path';
+
+// Memory-based rate limiter (Reset on server restart)
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+const RATE_LIMIT_COUNT = 10;
+const RATE_LIMIT_WINDOW = 3600000; // 1 hour
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining?: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT_COUNT - 1 };
+  }
+
+  if (entry.count >= RATE_LIMIT_COUNT) {
+    return { allowed: false };
+  }
+
+  entry.count += 1;
+  return { allowed: true, remaining: RATE_LIMIT_COUNT - entry.count };
+}
+
+async function writeLog(ip: string, payload: any, success: boolean, status: number, errorMessage?: string) {
+  try {
+    const tz = process.env.APP_TIMEZONE || 'Europe/Warsaw';
+    const logsDir = path.join(process.cwd(), 'logs', 'generates');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
+    const now = new Date();
+    // Use the configured timezone for the filename (YYYY-MM-DD)
+    const date = now.toLocaleDateString('en-CA', { timeZone: tz });
+    const logFile = path.join(logsDir, `${date}.log`);
+    
+    // Format timestamp: Y-m-d H:m:s.mls
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const getPart = (type: string) => parts.find(p => p.type === type)?.value;
+    const ms = now.getMilliseconds().toString().padStart(3, '0');
+    const formattedTimestamp = `${getPart('year')}-${getPart('month')}-${getPart('day')} ${getPart('hour')}:${getPart('minute')}:${getPart('second')}.${ms}`;
+
+    const logEntry = {
+      timestamp: formattedTimestamp,
+      ip,
+      payload,
+      success,
+      status,
+      error: errorMessage || null
+    };
+
+    fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
+  } catch (err) {
+    console.warn('Logging failed:', err);
+  }
+}
 
 export async function POST(req: NextRequest) {
   let browser: Browser | null = null;
+  let payload: any = {};
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
   
+  // Rate Limit Guard
+  const limit = checkRateLimit(ip);
+  if (!limit.allowed) {
+    await writeLog(ip, {}, false, 429, 'Rate limit exceeded');
+    return NextResponse.json({ error: 'Limit 10 zrzutów na godzinę został wyczerpany.' }, { status: 429 });
+  }
+
   try {
-    const body = await req.json();
-    const { url, width = 1920, height = 1080, fullPage = false, format = 'png' } = body;
+    payload = await req.json();
+    const { url, width = 1920, height = 1080, fullPage = true, format = 'png' } = payload;
 
     if (!url) {
+      await writeLog(ip, payload, false, 400, 'URL is required');
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
@@ -36,10 +115,7 @@ export async function POST(req: NextRequest) {
           defaultViewport: { width, height },
         });
       } catch (err) {
-        console.error('Failed to connect to production Chrome:', err);
-        return NextResponse.json({ 
-          error: 'Failed to connect to browser instance. Ensure Chrome is running with --remote-debugging-port=9222' 
-        }, { status: 500 });
+        throw new Error('Failed to connect to browser instance. Ensure Chrome is running with --remote-debugging-port=9222');
       }
     }
 
@@ -111,6 +187,8 @@ export async function POST(req: NextRequest) {
       await browser.disconnect();
     }
 
+    await writeLog(ip, payload, true, 200);
+
     const contentType = format === 'jpg' ? 'image/jpeg' : 'image/png';
     const filename = `screenshot.${format}`;
 
@@ -138,6 +216,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await writeLog(ip, payload, false, 500, error.message);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
