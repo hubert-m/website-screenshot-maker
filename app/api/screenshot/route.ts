@@ -53,6 +53,19 @@ export async function POST(req: NextRequest) {
     // Wait until network is idle to ensure initial resources are loaded
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 120000 });
 
+    // Handle common cookie consent buttons (e.g., Cookiebot)
+    try {
+      const cookieButtonId = 'CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll';
+      const hasCookieButton = await page.$(`#${cookieButtonId}`);
+      if (hasCookieButton) {
+        await page.click(`#${cookieButtonId}`);
+        // Small delay to allow the banner to disappear
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    } catch (e) {
+      // Ignore if not found or error
+    }
+
     // Auto-scroll logic to trigger lazy loading
     await page.evaluate(async (targetH, isFull) => {
       await new Promise<void>((resolve) => {
