@@ -202,10 +202,50 @@ export async function POST(req: NextRequest) {
 
     await writeLog(ip, payload, true, 200);
 
-    const contentType = format === 'jpg' ? 'image/jpeg' : 'image/png';
-    const filename = `screenshot.${format}`;
+    let contentType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+    let filename = `screenshot.${format}`;
+    let finalBuffer: any = screenshotBuffer;
 
-    return new NextResponse(screenshotBuffer as any, {
+    const compressorUrl = process.env.IMAGE_COMPRESSOR_URL;
+    const compressorToken = process.env.IMAGE_COMPRESSOR_TOKEN;
+
+    if (compressorUrl && compressorToken) {
+      try {
+        const formData = new FormData();
+        const blob = new Blob([screenshotBuffer as any], { type: contentType });
+        formData.append('image', blob, filename);
+
+        const compressResponse = await fetch(compressorUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${compressorToken}`,
+          },
+          body: formData,
+        });
+
+        if (compressResponse.ok) {
+          const compressData = await compressResponse.json();
+          if (compressData.success && compressData.data && compressData.data.url) {
+            const downloadResponse = await fetch(compressData.data.url);
+            if (downloadResponse.ok) {
+              const arrayBuffer = await downloadResponse.arrayBuffer();
+              finalBuffer = Buffer.from(arrayBuffer);
+              
+              const compressedFormat = compressData.data.format;
+              if (compressedFormat) {
+                contentType = `image/${compressedFormat}`;
+                filename = `screenshot.${compressedFormat}`;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Image compression failed:', e);
+        // Fallback to original buffer
+      }
+    }
+
+    return new NextResponse(finalBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
